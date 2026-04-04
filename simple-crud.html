@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple CRUD - Single File</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --danger: #dc2626;
+      --border: #d1d5db;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+
+    p {
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 10px;
+      margin: 10px 0;
+      align-items: center;
+    }
+
+    label {
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #fff;
+      background: var(--primary);
+    }
+
+    button.delete {
+      background: var(--danger);
+    }
+
+    .result-title {
+      margin: 12px 0 8px;
+      font-weight: 700;
+    }
+
+    #result {
+      width: 100%;
+      min-height: 180px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      background: #fafafa;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+
+    @media (max-width: 600px) {
+      .row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Single File CRUD Demo</h1>
+    <p>Data is stored in browser localStorage for localhost testing.</p>
+
+    <div class="row">
+      <label for="id">ID</label>
+      <input id="id" type="number" placeholder="Enter numeric ID">
+    </div>
+
+    <div class="row">
+      <label for="name">Name</label>
+      <input id="name" type="text" placeholder="Enter name">
+    </div>
+
+    <div class="row">
+      <label for="email">Email</label>
+      <input id="email" type="email" placeholder="Enter email">
+    </div>
+
+    <div class="buttons">
+      <button id="createBtn">Create</button>
+      <button id="readBtn">Read</button>
+      <button id="updateBtn">Update</button>
+      <button id="deleteBtn" class="delete">Delete</button>
+    </div>
+
+    <div class="result-title">Result Box</div>
+    <textarea id="result" readonly></textarea>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "single_file_crud_records";
+
+    const idEl = document.getElementById("id");
+    const nameEl = document.getElementById("name");
+    const emailEl = document.getElementById("email");
+    const resultEl = document.getElementById("result");
+
+    function loadRecords() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }
+
+    function saveRecords(records) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
+
+    function show(message, records) {
+      const data = records ?? loadRecords();
+      resultEl.value = message + "\n\n" + JSON.stringify(data, null, 2);
+    }
+
+    function getFormData() {
+      const id = Number(idEl.value.trim());
+      const name = nameEl.value.trim();
+      const email = emailEl.value.trim();
+      if (!Number.isFinite(id) || id <= 0) {
+        throw new Error("Valid ID is required.");
+      }
+      return { id, name, email };
+    }
+
+    document.getElementById("createBtn").addEventListener("click", () => {
+      try {
+        const record = getFormData();
+        const records = loadRecords();
+        if (records.some(r => r.id === record.id)) {
+          throw new Error("ID already exists.");
+        }
+        records.push(record);
+        saveRecords(records);
+        show("Create success.", records);
+      } catch (err) {
+        show("Create failed: " + err.message);
+      }
+    });
+
+    document.getElementById("readBtn").addEventListener("click", () => {
+      const records = loadRecords();
+      show("Read success.", records);
+    });
+
+    document.getElementById("updateBtn").addEventListener("click", () => {
+      try {
+        const record = getFormData();
+        const records = loadRecords();
+        const idx = records.findIndex(r => r.id === record.id);
+        if (idx === -1) {
+          throw new Error("Record not found for update.");
+        }
+        records[idx] = record;
+        saveRecords(records);
+        show("Update success.", records);
+      } catch (err) {
+        show("Update failed: " + err.message);
+      }
+    });
+
+    document.getElementById("deleteBtn").addEventListener("click", () => {
+      try {
+        const id = Number(idEl.value.trim());
+        if (!Number.isFinite(id) || id <= 0) {
+          throw new Error("Valid ID is required.");
+        }
+        const records = loadRecords();
+        const next = records.filter(r => r.id !== id);
+        if (next.length === records.length) {
+          throw new Error("Record not found for delete.");
+        }
+        saveRecords(next);
+        show("Delete success.", next);
+      } catch (err) {
+        show("Delete failed: " + err.message);
+      }
+    });
+
+    show("Ready.");
+  </script>
+</body>
+</html>
