@@ -5,15 +5,27 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBConnection {
-    private static final String URL = "jdbc:mysql://localhost:3306/gamersync";
-    private static final String USER = "root";
-    private static final String PASSWORD = System.getenv().getOrDefault("435162ns", "435162ns");
+    private static final String URL = System.getenv().getOrDefault(
+        "GAMERSYNC_DB_URL",
+        "jdbc:mysql://localhost:3306/GamerSync?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+    );
+    private static final String USER = System.getenv().getOrDefault("GAMERSYNC_DB_USER", "root");
+    private static final String PASSWORD = System.getenv().getOrDefault("GAMERSYNC_DB_PASSWORD", "435162ns");
 
     private static Connection connection = null;
 
     // Singleton pattern - only one connection at a time
     public static Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+            } catch (ClassNotFoundException e) {
+                throw new SQLException(
+                    "MySQL JDBC driver not found. Add mysql-connector-j to classpath.",
+                    e
+                );
+            }
+
             try {
                 connection = DriverManager.getConnection(URL, USER, PASSWORD);
             } catch (SQLException e) {
