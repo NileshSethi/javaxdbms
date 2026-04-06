@@ -2,6 +2,7 @@ package gamersync.service;
 
 import gamersync.db.DBConnection;
 import java.sql.*;
+import java.util.Scanner;
 
 // CO4: DRL queries (SELECT with JOIN, GROUP BY, WINDOW FUNCTIONS)
 // These are the specific queries from the GamerSync SQL file
@@ -178,6 +179,372 @@ public class QueryService {
             rs.close(); ps.close();
         } catch (SQLException e) {
             System.out.println("  [SQL ERROR] " + e.getMessage());
+        }
+    }
+
+    public void runCustomSelect(Scanner sc) {
+        System.out.print("  Enter any SELECT query:\n  > ");
+        String query = sc.nextLine().trim();
+
+        if (!query.toLowerCase().startsWith("select")) {
+            System.out.println("  [BLOCKED] Only SELECT queries are allowed.");
+            return;
+        }
+
+        try {
+            PreparedStatement ps = con.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+            
+            ResultSetMetaData meta = rs.getMetaData();
+            int colCount = meta.getColumnCount();
+
+            System.out.println();
+            for (int i = 1; i <= colCount; i++) {
+                System.out.printf("  %-18s", meta.getColumnName(i));
+            }
+            System.out.println();
+            System.out.println("  " + "-".repeat(colCount * 19));
+
+            int rowCount = 0;
+            while (rs.next()) {
+                for (int i = 1; i <= colCount; i++) {
+                    System.out.printf("  %-18s", rs.getString(i));
+                }
+                System.out.println();
+                rowCount++;
+            }
+            if (rowCount == 0) System.out.println("  (No results found)");
+            else System.out.println("\n  [✓] " + rowCount + " row(s) returned.");
+
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            System.out.println("  [SQL ERROR] " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("  [UNEXPECTED ERROR] " + e.getMessage());
+        }
+    }
+
+    public void runSelectWithFilter(Scanner sc) {
+        System.out.println("  Available tables: CUSTOMER, PC, GAMING_SESSION, GAMING_ACC,");
+        System.out.println("  ACHIEVEMENTS, MEMBERSHIP, TOURNAMENTS, PAYMENT, FOOD_ORDER");
+        System.out.print("  Enter table name: ");
+        String table = sc.nextLine().trim();
+        
+        System.out.print("  Enter column to filter by (or press Enter to skip): ");
+        String column = sc.nextLine().trim();
+
+        String sql;
+        String filterValue = null;
+
+        if (column.isEmpty()) {
+            sql = "SELECT * FROM " + table;
+        } else {
+            System.out.print("  Enter value to filter: ");
+            filterValue = sc.nextLine().trim();
+            sql = "SELECT * FROM " + table + " WHERE " + column + " = ?";
+        }
+
+        try {
+            PreparedStatement ps = con.prepareStatement(sql);
+            if (filterValue != null) {
+                ps.setString(1, filterValue);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            
+            ResultSetMetaData meta = rs.getMetaData();
+            int colCount = meta.getColumnCount();
+
+            System.out.println();
+            for (int i = 1; i <= colCount; i++) {
+                System.out.printf("  %-18s", meta.getColumnName(i));
+            }
+            System.out.println();
+            System.out.println("  " + "-".repeat(colCount * 19));
+
+            int rowCount = 0;
+            while (rs.next()) {
+                for (int i = 1; i <= colCount; i++) {
+                    System.out.printf("  %-18s", rs.getString(i));
+                }
+                System.out.println();
+                rowCount++;
+            }
+            if (rowCount == 0) System.out.println("  (No results found)");
+            else System.out.println("\n  [✓] " + rowCount + " row(s) returned.");
+
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            System.out.println("  [SQL ERROR] " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("  [UNEXPECTED ERROR] " + e.getMessage());
+        }
+    }
+
+    public void runGuidedJoin(Scanner sc) {
+        System.out.println("  Pick a JOIN query to run:");
+        System.out.println("  1.  CUSTOMER + GAMING_SESSION (sessions per customer)");
+        System.out.println("  2.  CUSTOMER + PAYMENT (payments per customer)");
+        System.out.println("  3.  GAMING_SESSION + FOOD_ORDER (food ordered per session)");
+        System.out.println("  4.  CUSTOMER + GAMING_ACC + ACHIEVEMENTS (achievements per player)");
+        System.out.println("  5.  CUSTOMER + TOURNAMENTS (tournament registrations)");
+        System.out.println("  6.  FOOD_ORDER total amount per session (GROUP BY)");
+        System.out.println("  7.  Most expensive food orders (ORDER BY DESC)");
+        System.out.println("  8.  Sessions that have food orders (INNER JOIN filter)");
+        System.out.println("  9.  Food order summary per customer (3-table JOIN)");
+        System.out.println("  10. All food orders with customer name and game played");
+        System.out.print("  Choice: ");
+        
+        String choice = sc.nextLine().trim();
+        String sql = null;
+
+        switch (choice) {
+            case "1":
+                sql = "SELECT C.NAME, G.SESSION_ID, G.GAME_NAME, G.DURATION " +
+                      "FROM CUSTOMER C JOIN GAMING_SESSION G ON C.CUST_ID = G.CUST_ID";
+                break;
+            case "2":
+                sql = "SELECT C.NAME, P.PAYMENT_ID, P.PAYMENT_MODE, P.AMOUNT " +
+                      "FROM CUSTOMER C JOIN PAYMENT P ON C.CUST_ID = P.CUST_ID";
+                break;
+            case "3":
+                sql = "SELECT G.SESSION_ID, G.GAME_NAME, F.ORDER_ITEM, F.TOTAL_AMOUNT " +
+                      "FROM GAMING_SESSION G JOIN FOOD_ORDER F ON G.SESSION_ID = F.SESSION_ID";
+                break;
+            case "4":
+                sql = "SELECT C.NAME, GA.GAME_NAME, GA.RANKK, A.ACHIEVE_NAME, A.DATE_UNLOCKED " +
+                      "FROM CUSTOMER C " +
+                      "JOIN GAMING_ACC GA ON C.CUST_ID = GA.CUST_ID " +
+                      "JOIN ACHIEVEMENTS A ON GA.GAMING_ACC_ID = A.GAMING_ACC_ID";
+                break;
+            case "5":
+                sql = "SELECT C.NAME, T.GAME_NAME, T.TOURNAMENT_DATE, T.ENTRY_FEE " +
+                      "FROM CUSTOMER C JOIN TOURNAMENTS T ON C.CUST_ID = T.CUST_ID";
+                break;
+            case "6":
+                sql = "SELECT F.SESSION_ID, SUM(F.TOTAL_AMOUNT) AS TOTAL_FOOD_BILL " +
+                      "FROM FOOD_ORDER F GROUP BY F.SESSION_ID ORDER BY TOTAL_FOOD_BILL DESC";
+                break;
+            case "7":
+                sql = "SELECT F.ORDER_ID, F.ORDER_ITEM, F.TOTAL_AMOUNT, G.GAME_NAME " +
+                      "FROM FOOD_ORDER F JOIN GAMING_SESSION G ON F.SESSION_ID = G.SESSION_ID " +
+                      "ORDER BY F.TOTAL_AMOUNT DESC";
+                break;
+            case "8":
+                sql = "SELECT G.SESSION_ID, G.GAME_NAME, G.DURATION, F.ORDER_ITEM " +
+                      "FROM GAMING_SESSION G INNER JOIN FOOD_ORDER F ON G.SESSION_ID = F.SESSION_ID";
+                break;
+            case "9":
+                sql = "SELECT C.NAME, G.GAME_NAME, F.ORDER_ITEM, F.TOTAL_AMOUNT " +
+                      "FROM CUSTOMER C " +
+                      "JOIN GAMING_SESSION G ON C.CUST_ID = G.CUST_ID " +
+                      "JOIN FOOD_ORDER F ON G.SESSION_ID = F.SESSION_ID";
+                break;
+            case "10":
+                sql = "SELECT C.NAME, G.GAME_NAME, G.START_TIME, F.ORDER_ITEM, F.TOTAL_AMOUNT " +
+                      "FROM CUSTOMER C " +
+                      "JOIN GAMING_SESSION G ON C.CUST_ID = G.CUST_ID " +
+                      "JOIN FOOD_ORDER F ON G.SESSION_ID = F.SESSION_ID " +
+                      "ORDER BY C.NAME";
+                break;
+            default:
+                System.out.println("  [!] Invalid option.");
+                return;
+        }
+
+        try {
+            PreparedStatement ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            
+            ResultSetMetaData meta = rs.getMetaData();
+            int colCount = meta.getColumnCount();
+
+            System.out.println();
+            for (int i = 1; i <= colCount; i++) {
+                System.out.printf("  %-18s", meta.getColumnName(i));
+            }
+            System.out.println();
+            System.out.println("  " + "-".repeat(colCount * 19));
+
+            int rowCount = 0;
+            while (rs.next()) {
+                for (int i = 1; i <= colCount; i++) {
+                    System.out.printf("  %-18s", rs.getString(i));
+                }
+                System.out.println();
+                rowCount++;
+            }
+            if (rowCount == 0) System.out.println("  (No results found)");
+            else System.out.println("\n  [✓] " + rowCount + " row(s) returned.");
+
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            System.out.println("  [SQL ERROR] " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("  [UNEXPECTED ERROR] " + e.getMessage());
+        }
+    }
+
+    public void callStoredProcedures(Scanner sc) {
+        System.out.println("  1. get_customer_data (by Customer ID)");
+        System.out.println("  2. get_sessions (all sessions)");
+        System.out.print("  Choice: ");
+        String choice = sc.nextLine().trim();
+
+        try {
+            if (choice.equals("1")) {
+                System.out.print("  Enter Customer ID: ");
+                int cid = Integer.parseInt(sc.nextLine().trim());
+                CallableStatement cs = con.prepareCall("{CALL get_customer_data(?)}");
+                cs.setInt(1, cid);
+                ResultSet rs = cs.executeQuery();
+                
+                ResultSetMetaData meta = rs.getMetaData();
+                int colCount = meta.getColumnCount();
+                System.out.println();
+                for (int i = 1; i <= colCount; i++) {
+                    System.out.printf("  %-18s", meta.getColumnName(i));
+                }
+                System.out.println();
+                System.out.println("  " + "-".repeat(colCount * 19));
+                
+                int rowCount = 0;
+                while (rs.next()) {
+                    for (int i = 1; i <= colCount; i++) {
+                        System.out.printf("  %-18s", rs.getString(i));
+                    }
+                    System.out.println();
+                    rowCount++;
+                }
+                if (rowCount == 0) System.out.println("  (No results found)");
+                else System.out.println("\n  [✓] " + rowCount + " row(s) returned.");
+                
+                cs.close();
+            } else if (choice.equals("2")) {
+                CallableStatement cs = con.prepareCall("{CALL get_sessions()}");
+                ResultSet rs = cs.executeQuery();
+                
+                ResultSetMetaData meta = rs.getMetaData();
+                int colCount = meta.getColumnCount();
+                System.out.println();
+                for (int i = 1; i <= colCount; i++) {
+                    System.out.printf("  %-18s", meta.getColumnName(i));
+                }
+                System.out.println();
+                System.out.println("  " + "-".repeat(colCount * 19));
+                
+                int rowCount = 0;
+                while (rs.next()) {
+                    for (int i = 1; i <= colCount; i++) {
+                        System.out.printf("  %-18s", rs.getString(i));
+                    }
+                    System.out.println();
+                    rowCount++;
+                }
+                if (rowCount == 0) System.out.println("  (No results found)");
+                else System.out.println("\n  [✓] " + rowCount + " row(s) returned.");
+                
+                cs.close();
+            } else {
+                System.out.println("  [!] Invalid choice.");
+            }
+        } catch (SQLException e) {
+            System.out.println("  [SQL ERROR] " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
+        } catch (Exception e) {
+            System.out.println("  [UNEXPECTED ERROR] " + e.getMessage());
+        }
+    }
+
+    public void callDBFunctions(Scanner sc) {
+        System.out.println("  1. get_total_payment(cust_id)  — total payments by a customer");
+        System.out.println("  2. session_duration(session_id) — duration of a session");
+        System.out.print("  Choice: ");
+        String choice = sc.nextLine().trim();
+
+        try {
+            if (choice.equals("1")) {
+                System.out.print("  Enter Customer ID: ");
+                int cid = Integer.parseInt(sc.nextLine().trim());
+                PreparedStatement ps = con.prepareStatement("SELECT get_total_payment(?) AS TOTAL_PAYMENT");
+                ps.setInt(1, cid);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    System.out.println("  Total Payment for Customer " + cid + ": Rs. " + rs.getInt("TOTAL_PAYMENT"));
+                }
+                rs.close(); ps.close();
+            } else if (choice.equals("2")) {
+                System.out.print("  Enter Session ID: ");
+                int sid = Integer.parseInt(sc.nextLine().trim());
+                PreparedStatement ps = con.prepareStatement("SELECT session_duration(?) AS DURATION");
+                ps.setInt(1, sid);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    System.out.println("  Duration of Session " + sid + ": " + rs.getInt("DURATION") + " minutes");
+                }
+                rs.close(); ps.close();
+            } else {
+                System.out.println("  [!] Invalid choice.");
+            }
+        } catch (SQLException e) {
+            System.out.println("  [SQL ERROR] " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
+        } catch (Exception e) {
+            System.out.println("  [UNEXPECTED ERROR] " + e.getMessage());
+        }
+    }
+
+    public void queryViews() {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("  1. customer_sessions view");
+        System.out.println("  2. total_spending view");
+        System.out.print("  Choice: ");
+        String choice = sc.nextLine().trim();
+
+        try {
+            String sql = "";
+            if (choice.equals("1")) {
+                sql = "SELECT * FROM customer_sessions";
+            } else if (choice.equals("2")) {
+                sql = "SELECT * FROM total_spending";
+            } else {
+                System.out.println("  [!] Invalid choice.");
+                return;
+            }
+
+            PreparedStatement ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            
+            ResultSetMetaData meta = rs.getMetaData();
+            int colCount = meta.getColumnCount();
+            System.out.println();
+            for (int i = 1; i <= colCount; i++) {
+                System.out.printf("  %-18s", meta.getColumnName(i));
+            }
+            System.out.println();
+            System.out.println("  " + "-".repeat(colCount * 19));
+            
+            int rowCount = 0;
+            while (rs.next()) {
+                for (int i = 1; i <= colCount; i++) {
+                    System.out.printf("  %-18s", rs.getString(i));
+                }
+                System.out.println();
+                rowCount++;
+            }
+            if (rowCount == 0) System.out.println("  (No results found)");
+            else System.out.println("\n  [✓] " + rowCount + " row(s) returned.");
+            
+            rs.close(); ps.close();
+        } catch (SQLException e) {
+            System.out.println("  [SQL ERROR] " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("  [UNEXPECTED ERROR] " + e.getMessage());
         }
     }
 }
