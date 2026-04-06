@@ -6,48 +6,6 @@ import gamersync.service.QueryService;
 import gamersync.service.SessionService;
 import java.util.Scanner;
 
-/*
- * ╔══════════════════════════════════════════════════════════════╗
- * ║           USE CASE DIAGRAM — GamerSync System               ║
- * ║              (Agile UML Artifact — CO3)                     ║
- * ╠══════════════════════════════════════════════════════════════╣
- * ║                                                              ║
- * ║  Actor: Café Staff                                           ║
- * ║                                                              ║
- * ║  Staff ──→ [Add Customer]                                    ║
- * ║  Staff ──→ [View / Search Customers]                         ║
- * ║  Staff ──→ [Update Customer]                                 ║
- * ║  Staff ──→ [Delete Customer]                                 ║
- * ║  Staff ──→ [Add Gaming Session]                              ║
- * ║  Staff ──→ [View Gaming Sessions]                            ║
- * ║  Staff ──→ [Delete Gaming Session]                           ║
- * ║               └──«includes»──→ [Delete Payments]            ║
- * ║               └──«includes»──→ [Delete Food Orders]         ║
- * ║  Staff ──→ [Run Analytical Queries]                          ║
- * ║               └── Customer + Game + PC Report               ║
- * ║               └── Total Spending per Customer               ║
- * ║               └── Long Session Customers (>100 min)         ║
- * ║               └── Membership + Games Played                 ║
- * ║               └── Rank Customers by Spending                ║
- * ║               └── Tournament Overview                       ║
- * ║               └── Payment Summary by Mode                   ║
- * ║               └── Top Gaming Accounts by Level              ║
- * ╚══════════════════════════════════════════════════════════════╝
- *
- * HOW TO COMPILE & RUN (Windows CMD):
- * ------------------------------------
- * 1. Place mysql-connector-j-x.x.x.jar inside GamerSync\lib\
- * 2. Open CMD inside GamerSync\src\
- * 3. Compile:
- *    javac -cp ".;..\lib\*" gamersync\db\*.java gamersync\model\*.java gamersync\dao\*.java gamersync\service\*.java gamersync\Main.java
- * 4. Run:
- *    java -cp ".;..\lib\*" gamersync.Main
- *
- * DATABASE SETUP:
- * ---------------
- * 1. Open MySQL Workbench → run gamersync_database_project.sql
- * 2. Open DBConnection.java → set your MySQL password
- */
 public class Main {
 
     public static void main(String[] args) {
@@ -59,7 +17,6 @@ public class Main {
         System.out.println("  ║          Console Application           ║");
         System.out.println("  ╚════════════════════════════════════════╝");
 
-        // Test DB connection on startup
         try {
             DBConnection.getConnection();
             System.out.println("  [✓] Connected to GamerSync database.\n");
@@ -101,7 +58,6 @@ public class Main {
         sc.close();
     }
 
-    // ── Analytical Queries Sub-Menu ───────────────────────────────────────────
     private static void queryMenu(Scanner sc, QueryService qs) {
         boolean back = false;
         while (!back) {
