@@ -5,10 +5,9 @@ import gamersync.model.GamingSession;
 import java.sql.SQLException;
 import java.util.List;
 
-// Interface defining the contract for all Gaming Session DB operations
-public interface ISessionDAO extends CRUDOperations<GamingSession, Integer> {
-    void addSession(GamingSession s) throws SQLException, InvalidDataException;
-    List<GamingSession> getAllSessions() throws SQLException;
-    void updateSession(GamingSession s) throws SQLException, InvalidDataException;
-    void deleteSession(int sessionId) throws SQLException;
+// CO2: Interface — defines contract for Session operations
+public interface ISessionDAO {
+    void               addSession(GamingSession s) throws SQLException, InvalidDataException;
+    List<GamingSession> getAllSessions()            throws SQLException;
+    void               deleteSession(int sessionId) throws SQLException;
 }
