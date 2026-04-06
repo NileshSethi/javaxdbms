@@ -29,6 +29,8 @@ public class PCService {
             System.out.println("  ║  3. View PCs In Use                      ║");
             System.out.println("  ║  4. Update PC Status                     ║");
             System.out.println("  ║  5. View PC by ID                        ║");
+            System.out.println("  ║  6. Add New PC                           ║");
+            System.out.println("  ║  7. Delete PC                            ║");
             System.out.println("  ║  0. Back                                 ║");
             System.out.println("  ╚══════════════════════════════════════════╝");
             System.out.print("  Choice: ");
@@ -39,6 +41,8 @@ public class PCService {
                 case "3": viewPcsInUse(); break;
                 case "4": updatePcStatus(); break;
                 case "5": viewPcById(); break;
+                case "6": addNewPc(); break;
+                case "7": deletePc(); break;
                 case "0": back = true; break;
                 default: System.out.println("  [!] Invalid choice.");
             }
@@ -159,6 +163,65 @@ public class PCService {
                 System.out.println("  [!] PC not found.");
             }
             rs.close(); ps.close();
+        } catch (SQLException e) {
+            System.out.println("  [SQL ERROR] " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
+        } catch (Exception e) {
+            System.out.println("  [UNEXPECTED ERROR] " + e.getMessage());
+        }
+    }
+
+    private void addNewPc() {
+        try {
+            System.out.print("  Enter PC_ID: ");
+            int id = Integer.parseInt(sc.nextLine().trim());
+            System.out.print("  Enter CONFIGURATION (e.g. RTX 4080, i9): ");
+            String conf = sc.nextLine().trim();
+            System.out.print("  Enter STATUS (Available / In Use / Maintenance): ");
+            String status = sc.nextLine().trim();
+            System.out.print("  Enter HOURLY_RATE: ");
+            double HR = Double.parseDouble(sc.nextLine().trim());
+
+            if (conf.isEmpty()) throw new InvalidDataException("Configuration cannot be empty");
+            if (HR <= 0) throw new InvalidDataException("Hourly rate must be greater than 0");
+            
+            if (!status.equals("Available") && !status.equals("In Use") && !status.equals("Maintenance")) {
+                throw new InvalidDataException("Invalid status. Use: Available, In Use, or Maintenance");
+            }
+
+            PreparedStatement ps = con.prepareStatement(
+                "INSERT INTO PC (PC_ID, CONFIGURATION, STATUS, HOURLY_RATE) VALUES (?,?,?,?)");
+            ps.setInt(1, id);
+            ps.setString(2, conf);
+            ps.setString(3, status);
+            ps.setDouble(4, HR);
+            ps.executeUpdate();
+            ps.close();
+            System.out.println("  [✓] PC added successful.");
+        } catch (InvalidDataException e) {
+            System.out.println("  [VALIDATION ERROR] " + e.getMessage());
+        } catch (SQLException e) {
+            System.out.println("  [SQL ERROR] " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
+        } catch (Exception e) {
+            System.out.println("  [UNEXPECTED ERROR] " + e.getMessage());
+        }
+    }
+
+    private void deletePc() {
+        try {
+            System.out.print("  Enter PC_ID: ");
+            int id = Integer.parseInt(sc.nextLine().trim());
+            System.out.print("  Confirm delete? (yes/no): ");
+            if (!sc.nextLine().trim().toLowerCase().equals("yes")) return;
+
+            PreparedStatement ps = con.prepareStatement("DELETE FROM PC WHERE PC_ID = ?");
+            ps.setInt(1, id);
+            ps.executeUpdate();
+            ps.close();
+            System.out.println("  [✓] PC deleted successful.");
         } catch (SQLException e) {
             System.out.println("  [SQL ERROR] " + e.getMessage());
         } catch (NumberFormatException e) {

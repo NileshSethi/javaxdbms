@@ -4,6 +4,7 @@ import gamersync.db.DBConnection;
 import gamersync.service.CustomerService;
 import gamersync.service.FoodPaymentService;
 import gamersync.service.GamingProfileService;
+import gamersync.service.MembershipService;
 import gamersync.service.PCService;
 import gamersync.service.QueryService;
 import gamersync.service.SessionService;
@@ -38,6 +39,7 @@ public class Main {
         FoodPaymentService   foodPaymentService = new FoodPaymentService(sc);
         TournamentService    tournamentService  = new TournamentService(sc);
         PCService            pcService          = new PCService(sc);
+        MembershipService    membershipService  = new MembershipService(sc);
         QueryService         queryService       = new QueryService();
 
         boolean running = true;
@@ -45,34 +47,36 @@ public class Main {
             System.out.println("  ╔══════════════════════════════════════════╗");
             System.out.println("  ║                MAIN MENU                 ║");
             System.out.println("  ╠══════════════════════════════════════════╣");
-            System.out.println("  ║  1. Walk-In Flow                         ║");
-            System.out.println("  ║  2. Customer Module                      ║");
+            System.out.println("  ║  1. Customer Module                      ║");
+            System.out.println("  ║  2. PC Management                        ║");
             System.out.println("  ║  3. Session Module                       ║");
-            System.out.println("  ║  4. Gaming Profile                       ║");
-            System.out.println("  ║  5. Food & Payment                       ║");
-            System.out.println("  ║  6. Tournaments                          ║");
-            System.out.println("  ║  7. PC Management                        ║");
-            System.out.println("  ║  8. Analytical Queries                   ║");
+            System.out.println("  ║  4. Gaming Profile (GAMING_ACC & ACHIEV) ║");
+            System.out.println("  ║  5. Memberships Module                   ║");
+            System.out.println("  ║  6. Food & Payment                       ║");
+            System.out.println("  ║  7. Tournaments                          ║");
+            System.out.println("  ║  8. Walk-In Flow (Combinations)          ║");
+            System.out.println("  ║  9. Analytical Queries                   ║");
             System.out.println("  ║  0. Exit                                 ║");
             System.out.println("  ╚══════════════════════════════════════════╝");
             System.out.print("  Choice: ");
 
             switch (sc.nextLine().trim()) {
-                case "1": walkInService.menu();        break;
-                case "2": customerService.menu();      break;
+                case "1": customerService.menu();      break;
+                case "2": pcService.menu();            break;
                 case "3": sessionService.menu();       break;
                 case "4": profileService.menu();       break;
-                case "5": foodPaymentService.menu();   break;
-                case "6": tournamentService.menu();    break;
-                case "7": pcService.menu();            break;
-                case "8": queryMenu(sc, queryService); break;
+                case "5": membershipService.menu();    break;
+                case "6": foodPaymentService.menu();   break;
+                case "7": tournamentService.menu();    break;
+                case "8": walkInService.menu();        break;
+                case "9": queryMenu(sc, queryService); break;
                 case "0":
                     running = false;
                     DBConnection.close();
                     System.out.println("\n  Goodbye! GamerSync session ended.");
                     break;
                 default:
-                    System.out.println("  [!] Invalid choice. Please enter 0-8.");
+                    System.out.println("  [!] Invalid choice. Please enter 0-9.");
             }
         }
         sc.close();
