@@ -9,10 +9,10 @@
 
 ## 👥 Team Members
 <!-- Add your names here -->
-- Member 1: (Name)
-- Member 2: (Name)
-- Member 3: (Name)
-- Member 4: (Name)
+- Member 1: NILESH SETHI
+- Member 2: OM GADWE
+- Member 3: NIMHAN VEDANT
+- Member 4: OMAR PATEL
 
 ---
 
