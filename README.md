@@ -166,20 +166,6 @@ DB Features used: Triggers, Stored Procedures, Functions, Views
 
 ---
 
-## 📚 Rubric Coverage
-
-| Marks | CO | Requirement | Covered By |
-|---|---|---|---|
-| 2 | CO1 | Classes, variables, access specifiers | All model + DAO classes |
-| 2 | CO2 | Inheritance, polymorphism, interfaces, packages | BaseDAO, ICustomerDAO, toString() |
-| 3 | CO3 | Specific exception handling | InvalidDataException + SQLException + NumberFormatException |
-| 2 | CO3 | Agile UML diagram | Use Case Diagram in Main.java comments |
-| 5 | CO4 | DML queries | INSERT/UPDATE/DELETE across all 12 tables |
-| 5 | CO4 | DRL queries | SELECT + JOIN + GROUP BY + WINDOW FUNCTIONS |
-| 5 | CO4 | DBMS reports | Phase 1 + Phase 2 submitted separately |
-
----
-
 ## 📝 Notes
 
 - END_TIME in sessions is auto-calculated from START_TIME + DURATION (never entered manually)
