@@ -2,6 +2,7 @@ package gamersync.service;
 
 import gamersync.dao.CustomerDAO;
 import gamersync.db.InvalidDataException;
+import gamersync.db.ValidationHelper;
 import gamersync.model.Customer;
 import java.sql.SQLException;
 import java.util.List;
@@ -54,6 +55,12 @@ public class CustomerService {
             System.out.print("  Phone         : "); String phone = sc.nextLine().trim();
             System.out.print("  Email         : "); String email = sc.nextLine().trim();
             System.out.print("  Reg Date (YYYY-MM-DD): "); String date = sc.nextLine().trim();
+
+            ValidationHelper.validateNotEmpty(name, "Name");
+            ValidationHelper.validatePhone(phone);
+            ValidationHelper.validateEmail(email);
+            ValidationHelper.validateDate(date, "Registered Date");
+            ValidationHelper.validatePositiveInt(id, "Customer ID");
 
             dao.addCustomer(new Customer(id, name, phone, email, date));
             System.out.println("  [✓] Customer added successfully.");
@@ -138,11 +145,16 @@ public class CustomerService {
             String emailInput = sc.nextLine().trim();
             System.out.print("  New Date (YYYY-MM-DD) (or Enter to keep)   : "); 
             String dateInput = sc.nextLine().trim();
-
-            String name = nameInput.isEmpty() ? current.getName() : nameInput;
+String name = nameInput.isEmpty() ? current.getName() : nameInput;
             String phone = phoneInput.isEmpty() ? current.getPhone() : phoneInput;
             String email = emailInput.isEmpty() ? current.getEmail() : emailInput;
             String date = dateInput.isEmpty() ? current.getRegisteredDate() : dateInput;
+
+            ValidationHelper.validateNotEmpty(name, "Name");
+            ValidationHelper.validatePhone(phone);
+            ValidationHelper.validateEmail(email);
+            ValidationHelper.validateDate(date, "Registered Date");
+            ValidationHelper.validatePositiveInt(id, "Customer ID");
 
             dao.updateCustomer(new Customer(id, name, phone, email, date));
             System.out.println("  [✓] Customer updated successfully.");
@@ -173,3 +185,4 @@ public class CustomerService {
         }
     }
 }
+

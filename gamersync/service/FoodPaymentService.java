@@ -2,6 +2,7 @@ package gamersync.service;
 
 import gamersync.db.DBConnection;
 import gamersync.db.InvalidDataException;
+import gamersync.db.ValidationHelper;
 import java.sql.*;
 import java.util.Scanner;
 
@@ -65,6 +66,11 @@ public class FoodPaymentService {
             if (item.isEmpty()) throw new InvalidDataException("ORDER_ITEM cannot be empty");
             if (amount <= 0) throw new InvalidDataException("TOTAL_AMOUNT must be greater than 0");
 
+            ValidationHelper.validatePositiveInt(id, "Order ID");
+            ValidationHelper.validateNotEmpty(item, "Order Item");
+            ValidationHelper.validatePositiveAmount(amount, "Total Amount");
+            ValidationHelper.validatePositiveInt(sessionId, "Session ID");
+
             PreparedStatement ps = con.prepareStatement(
                 "INSERT INTO FOOD_ORDER (ORDER_ID, ORDER_ITEM, TOTAL_AMOUNT, SESSION_ID) VALUES (?,?,?,?)");
             ps.setInt(1, id);
@@ -77,7 +83,18 @@ public class FoodPaymentService {
         } catch (InvalidDataException e) {
             System.out.println("  [VALIDATION ERROR] " + e.getMessage());
         } catch (SQLException e) {
-            System.out.println("  [SQL ERROR] " + e.getMessage());
+            String msg = e.getMessage();
+            if (msg.contains("a foreign key constraint fails")) {
+                if (msg.toLowerCase().contains("session")) {
+                    System.out.println("  [SQL ERROR] The Session ID you entered does not exist!");
+                } else if (msg.toLowerCase().contains("customer")) {
+                    System.out.println("  [SQL ERROR] The Customer ID you entered does not exist!");
+                } else {
+                    System.out.println("  [SQL ERROR] A parent ID does not exist.");
+                }
+            } else {
+                System.out.println("  [SQL ERROR] " + msg);
+            }
         } catch (NumberFormatException e) {
             System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
         } catch (Exception e) {
@@ -124,7 +141,18 @@ public class FoodPaymentService {
             }
             rs.close(); ps.close();
         } catch (SQLException e) {
-            System.out.println("  [SQL ERROR] " + e.getMessage());
+            String msg = e.getMessage();
+            if (msg.contains("a foreign key constraint fails")) {
+                if (msg.toLowerCase().contains("session")) {
+                    System.out.println("  [SQL ERROR] The Session ID you entered does not exist!");
+                } else if (msg.toLowerCase().contains("customer")) {
+                    System.out.println("  [SQL ERROR] The Customer ID you entered does not exist!");
+                } else {
+                    System.out.println("  [SQL ERROR] A parent ID does not exist.");
+                }
+            } else {
+                System.out.println("  [SQL ERROR] " + msg);
+            }
         } catch (NumberFormatException e) {
             System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
         } catch (Exception e) {
@@ -182,7 +210,18 @@ public class FoodPaymentService {
         } catch (InvalidDataException e) {
             System.out.println("  [VALIDATION ERROR] " + e.getMessage());
         } catch (SQLException e) {
-            System.out.println("  [SQL ERROR] " + e.getMessage());
+            String msg = e.getMessage();
+            if (msg.contains("a foreign key constraint fails")) {
+                if (msg.toLowerCase().contains("session")) {
+                    System.out.println("  [SQL ERROR] The Session ID you entered does not exist!");
+                } else if (msg.toLowerCase().contains("customer")) {
+                    System.out.println("  [SQL ERROR] The Customer ID you entered does not exist!");
+                } else {
+                    System.out.println("  [SQL ERROR] A parent ID does not exist.");
+                }
+            } else {
+                System.out.println("  [SQL ERROR] " + msg);
+            }
         } catch (NumberFormatException e) {
             System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
         } catch (Exception e) {
@@ -205,6 +244,12 @@ public class FoodPaymentService {
 
             if (mode.isEmpty()) throw new InvalidDataException("PAYMENT_MODE cannot be empty");
             if (amount <= 0) throw new InvalidDataException("Amount must be greater than 0");
+
+            ValidationHelper.validatePositiveInt(id, "Payment ID");
+            ValidationHelper.validatePaymentMode(mode);
+            ValidationHelper.validatePositiveAmount(amount, "Amount");
+            ValidationHelper.validatePositiveInt(custId, "Customer ID");
+            ValidationHelper.validatePositiveInt(sessionId, "Session ID");
 
             PreparedStatement ps = con.prepareStatement(
                 "INSERT INTO PAYMENT (PAYMENT_ID, PAYMENT_MODE, AMOUNT, CUST_ID, SESSION_ID) VALUES (?,?,?,?,?)");
@@ -269,7 +314,18 @@ public class FoodPaymentService {
             }
             rs.close(); ps.close();
         } catch (SQLException e) {
-            System.out.println("  [SQL ERROR] " + e.getMessage());
+            String msg = e.getMessage();
+            if (msg.contains("a foreign key constraint fails")) {
+                if (msg.toLowerCase().contains("session")) {
+                    System.out.println("  [SQL ERROR] The Session ID you entered does not exist!");
+                } else if (msg.toLowerCase().contains("customer")) {
+                    System.out.println("  [SQL ERROR] The Customer ID you entered does not exist!");
+                } else {
+                    System.out.println("  [SQL ERROR] A parent ID does not exist.");
+                }
+            } else {
+                System.out.println("  [SQL ERROR] " + msg);
+            }
         } catch (NumberFormatException e) {
             System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
         } catch (Exception e) {
@@ -351,7 +407,18 @@ public class FoodPaymentService {
             }
             System.out.println("  ╚══════════════════════════════════════════╝");
         } catch (SQLException e) {
-            System.out.println("  [SQL ERROR] " + e.getMessage());
+            String msg = e.getMessage();
+            if (msg.contains("a foreign key constraint fails")) {
+                if (msg.toLowerCase().contains("session")) {
+                    System.out.println("  [SQL ERROR] The Session ID you entered does not exist!");
+                } else if (msg.toLowerCase().contains("customer")) {
+                    System.out.println("  [SQL ERROR] The Customer ID you entered does not exist!");
+                } else {
+                    System.out.println("  [SQL ERROR] A parent ID does not exist.");
+                }
+            } else {
+                System.out.println("  [SQL ERROR] " + msg);
+            }
         } catch (NumberFormatException e) {
             System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
         } catch (Exception e) {

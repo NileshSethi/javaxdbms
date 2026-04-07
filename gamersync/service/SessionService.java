@@ -1,21 +1,32 @@
 package gamersync.service;
 
 import gamersync.dao.SessionDAO;
+import gamersync.db.DBConnection;
 import gamersync.db.InvalidDataException;
+import gamersync.db.ValidationHelper;
 import gamersync.model.GamingSession;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 
-// Service layer — handles CLI input/output for Session module
 public class SessionService {
 
     private final SessionDAO dao = new SessionDAO();
     private final Scanner sc;
+    private Connection con;
 
-    public SessionService(Scanner sc) { this.sc = sc; }
+    public SessionService(Scanner sc) {
+        this.sc = sc;
+        try {
+            this.con = DBConnection.getConnection();
+        } catch (SQLException e) {
+            System.out.println("  [ERROR] DB connection failed: " + e.getMessage());
+        }
+    }
 
     // ── Main menu loop ────────────────────────────────────────────────────────
     public void menu() {
@@ -59,13 +70,36 @@ public class SessionService {
             System.out.print("  Customer ID         : "); int cid  = Integer.parseInt(sc.nextLine().trim());
             System.out.print("  PC ID               : "); int pcid = Integer.parseInt(sc.nextLine().trim());
 
+            ValidationHelper.validatePositiveInt(sid, "Session ID");
+            ValidationHelper.validateDateTime(start, "Start Time");
+            ValidationHelper.validateDuration(dur);
+            ValidationHelper.validateNotEmpty(game, "Game Name");
+            ValidationHelper.validatePositiveInt(cid, "Customer ID");
+            ValidationHelper.validatePositiveInt(pcid, "PC ID");
+
             dao.addSession(new GamingSession(sid, start, end, dur, game, cid, pcid));
             System.out.println("  [✓] Session added successfully.");
+
+            System.out.print("\n  Add food order for this session? (yes/no): ");
+            if (sc.nextLine().trim().equalsIgnoreCase("yes")) collectFoodOrder(sid);
+            System.out.print("  Collect payment now? (yes/no): ");
+            if (sc.nextLine().trim().equalsIgnoreCase("yes")) collectPayment(cid, sid);
 
         } catch (InvalidDataException e) {
             System.out.println("  [VALIDATION ERROR] " + e.getMessage());
         } catch (SQLException e) {
-            System.out.println("  [SQL ERROR] " + e.getMessage());
+            String msg = e.getMessage();
+            if (msg.contains("a foreign key constraint fails")) {
+                if (msg.toLowerCase().contains("customer")) {
+                    System.out.println("  [SQL ERROR] The Customer ID you entered does not exist!");
+                } else if (msg.toLowerCase().contains("pc")) {
+                    System.out.println("  [SQL ERROR] The PC ID you entered does not exist!");
+                } else {
+                    System.out.println("  [SQL ERROR] A parent ID does not exist.");
+                }
+            } else {
+                System.out.println("  [SQL ERROR] " + msg);
+            }
         } catch (NumberFormatException e) {
             System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
         } catch (Exception e) {
@@ -130,6 +164,13 @@ public class SessionService {
             int newCust = custInput.isEmpty() ? current.getCustId() : Integer.parseInt(custInput);
             int newPc = pcInput.isEmpty() ? current.getPcId() : Integer.parseInt(pcInput);
 
+            ValidationHelper.validatePositiveInt(sid, "Session ID");
+            ValidationHelper.validateDateTime(newStart, "Start Time");
+            ValidationHelper.validateDuration(newDur);
+            ValidationHelper.validateNotEmpty(newGame, "Game Name");
+            ValidationHelper.validatePositiveInt(newCust, "Customer ID");
+            ValidationHelper.validatePositiveInt(newPc, "PC ID");
+
             LocalDateTime startTime = LocalDateTime.parse(newStart, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             String newEnd = startTime.plusMinutes(newDur).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             
@@ -144,7 +185,18 @@ public class SessionService {
         } catch (InvalidDataException e) {
             System.out.println("  [VALIDATION ERROR] " + e.getMessage());
         } catch (SQLException e) {
-            System.out.println("  [SQL ERROR] " + e.getMessage());
+            String msg = e.getMessage();
+            if (msg.contains("a foreign key constraint fails")) {
+                if (msg.toLowerCase().contains("customer")) {
+                    System.out.println("  [SQL ERROR] The Customer ID you entered does not exist!");
+                } else if (msg.toLowerCase().contains("pc")) {
+                    System.out.println("  [SQL ERROR] The PC ID you entered does not exist!");
+                } else {
+                    System.out.println("  [SQL ERROR] A parent ID does not exist.");
+                }
+            } else {
+                System.out.println("  [SQL ERROR] " + msg);
+            }
         } catch (NumberFormatException e) {
             System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
         } catch (Exception e) {
@@ -161,9 +213,102 @@ public class SessionService {
             dao.deleteSession(id);
             System.out.println("  [✓] Session and linked records deleted.");
         } catch (SQLException e) {
-            System.out.println("  [SQL ERROR] " + e.getMessage());
+            String msg = e.getMessage();
+            if (msg.contains("a foreign key constraint fails")) {
+                if (msg.toLowerCase().contains("customer")) {
+                    System.out.println("  [SQL ERROR] The Customer ID you entered does not exist!");
+                } else if (msg.toLowerCase().contains("pc")) {
+                    System.out.println("  [SQL ERROR] The PC ID you entered does not exist!");
+                } else {
+                    System.out.println("  [SQL ERROR] A parent ID does not exist.");
+                }
+            } else {
+                System.out.println("  [SQL ERROR] " + msg);
+            }
         } catch (NumberFormatException e) {
             System.out.println("  [INPUT ERROR] ID must be a number.");
+        }
+    }
+
+
+    private void collectFoodOrder(int sessionId) {
+        try {
+            System.out.print("  Food Order ID : "); 
+            int orderId = Integer.parseInt(sc.nextLine().trim());
+            System.out.print("  Order Item    : "); 
+            String item = sc.nextLine().trim();
+            System.out.print("  Total Amount  : "); 
+            double amount = Double.parseDouble(sc.nextLine().trim());
+
+            ValidationHelper.validatePositiveInt(orderId, "Order ID");
+            ValidationHelper.validateNotEmpty(item, "Order Item");
+            ValidationHelper.validatePositiveAmount(amount, "Total Amount");
+
+            String sql = "INSERT INTO FOOD_ORDER (ORDER_ID, ORDER_ITEM, TOTAL_AMOUNT, SESSION_ID) VALUES (?,?,?,?)";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setInt(1, orderId);
+            ps.setString(2, item);
+            ps.setDouble(3, amount);
+            ps.setInt(4, sessionId);
+            ps.executeUpdate();
+            ps.close();
+            System.out.println("  [\u2713] Food order added: " + item + " \u2014 Rs. " + amount);
+
+        } catch (InvalidDataException e) {
+            System.out.println("  [VALIDATION ERROR] " + e.getMessage());
+        } catch (SQLException e) {
+            System.out.println("  [SQL ERROR] " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("  [INPUT ERROR] Amount and ID must be numbers.");
+        } catch (Exception e) {
+            System.out.println("  [UNEXPECTED ERROR] " + e.getMessage());
+        }
+    }
+
+    private void collectPayment(int custId, int sessionId) {
+        try {
+            System.out.print("  Payment ID    : "); 
+            int payId = Integer.parseInt(sc.nextLine().trim());
+            System.out.print("  Payment Mode (UPI/Cash/Card): "); 
+            String mode = sc.nextLine().trim();
+            System.out.print("  Amount        : "); 
+            double amount = Double.parseDouble(sc.nextLine().trim());
+
+            ValidationHelper.validatePositiveInt(payId, "Payment ID");
+            ValidationHelper.validatePaymentMode(mode);
+            ValidationHelper.validatePositiveAmount(amount, "Amount");
+
+            String sql = "INSERT INTO PAYMENT (PAYMENT_ID, PAYMENT_MODE, AMOUNT, CUST_ID, SESSION_ID) VALUES (?,?,?,?,?)";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setInt(1, payId);
+            ps.setString(2, mode);
+            ps.setDouble(3, amount);
+            ps.setInt(4, custId);
+            ps.setInt(5, sessionId);
+            ps.executeUpdate();
+            ps.close();
+            System.out.println("  [\u2713] Payment recorded: " + mode + " \u2014 Rs. " + amount);
+
+            System.out.println("\n  \u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557");
+            System.out.println("  \u2551         QUICK RECEIPT                \u2551");
+            System.out.println("  \u2560\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2563");
+            System.out.printf ("  \u2551  Session ID  : %-21d\u2551%n", sessionId);
+            System.out.printf ("  \u2551  Customer ID : %-21d\u2551%n", custId);
+            System.out.printf ("  \u2551  Mode        : %-21s\u2551%n", mode);
+            System.out.printf ("  \u2551  Amount Paid : Rs. %-18.2f\u2551%n", amount);
+            System.out.println("  \u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255d");
+
+        } catch (InvalidDataException e) {
+            System.out.println("  [VALIDATION ERROR] " + e.getMessage());
+        } catch (SQLException e) {
+            if (e.getMessage() != null && e.getMessage().contains("Invalid Amount"))
+                System.out.println("  [DB TRIGGER] Payment rejected \u2014 amount must be > 0");
+            else
+                System.out.println("  [SQL ERROR] " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("  [INPUT ERROR] Amount and ID must be numbers.");
+        } catch (Exception e) {
+            System.out.println("  [UNEXPECTED ERROR] " + e.getMessage());
         }
     }
 }

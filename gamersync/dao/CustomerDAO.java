@@ -94,6 +94,23 @@ public class CustomerDAO extends BaseDAO implements ICustomerDAO {
     // ── DELETE (DML) ─────────────────────────────────────────────────────────
     @Override
     public void deleteCustomer(int custId) throws SQLException {
+        // Delete child rows first to avoid foreign key constraint errors
+        con.prepareStatement("DELETE FROM ACHIEVEMENTS WHERE GAMING_ACC_ID IN (SELECT GAMING_ACC_ID FROM GAMING_ACC WHERE CUST_ID=" + custId + ")").executeUpdate();
+        con.prepareStatement("DELETE FROM GAMING_ACC WHERE CUST_ID=" + custId).executeUpdate();
+        
+        con.prepareStatement("DELETE FROM FOOD_ORDER WHERE SESSION_ID IN (SELECT SESSION_ID FROM GAMING_SESSION WHERE CUST_ID=" + custId + ")").executeUpdate();
+        con.prepareStatement("DELETE FROM PAYMENT WHERE SESSION_ID IN (SELECT SESSION_ID FROM GAMING_SESSION WHERE CUST_ID=" + custId + ")").executeUpdate();
+        con.prepareStatement("DELETE FROM PAYMENT WHERE CUST_ID=" + custId).executeUpdate(); // Catch any payments just linked to customer
+        con.prepareStatement("DELETE FROM GAMING_SESSION WHERE CUST_ID=" + custId).executeUpdate();
+
+        con.prepareStatement("DELETE FROM HOURLY WHERE MEMBERSHIP_ID IN (SELECT MEMBERSHIP_ID FROM MEMBERSHIP WHERE CUST_ID=" + custId + ")").executeUpdate();
+        con.prepareStatement("DELETE FROM WEEKLY WHERE MEMBERSHIP_ID IN (SELECT MEMBERSHIP_ID FROM MEMBERSHIP WHERE CUST_ID=" + custId + ")").executeUpdate();
+        con.prepareStatement("DELETE FROM MONTHLY WHERE MEMBERSHIP_ID IN (SELECT MEMBERSHIP_ID FROM MEMBERSHIP WHERE CUST_ID=" + custId + ")").executeUpdate();
+        con.prepareStatement("DELETE FROM MEMBERSHIP WHERE CUST_ID=" + custId).executeUpdate();
+
+        con.prepareStatement("DELETE FROM TOURNAMENTS WHERE CUST_ID=" + custId).executeUpdate();
+
+        // Finally delete the customer
         PreparedStatement ps = con.prepareStatement("DELETE FROM CUSTOMER WHERE CUST_ID=?");
         ps.setInt(1, custId);
         ps.executeUpdate();

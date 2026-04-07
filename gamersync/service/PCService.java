@@ -2,6 +2,7 @@ package gamersync.service;
 
 import gamersync.db.DBConnection;
 import gamersync.db.InvalidDataException;
+import gamersync.db.ValidationHelper;
 import java.sql.*;
 import java.util.Scanner;
 
@@ -128,6 +129,9 @@ public class PCService {
             if (!status.equals("Available") && !status.equals("In Use") && !status.equals("Maintenance")) {
                 throw new InvalidDataException("Invalid status. Use: Available, In Use, or Maintenance");
             }
+
+            ValidationHelper.validatePositiveInt(id, "PC ID");
+            ValidationHelper.validatePCStatus(status);
 
             PreparedStatement ps = con.prepareStatement("UPDATE PC SET STATUS = ? WHERE PC_ID = ?");
             ps.setString(1, status);

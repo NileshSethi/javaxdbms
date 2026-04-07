@@ -2,6 +2,7 @@ package gamersync.service;
 
 import gamersync.db.DBConnection;
 import gamersync.db.InvalidDataException;
+import gamersync.db.ValidationHelper;
 import java.sql.*;
 import java.util.Scanner;
 
@@ -65,6 +66,13 @@ public class GamingProfileService {
             if (level <= 0) throw new InvalidDataException("Level must be greater than 0");
             if (user.isEmpty()) throw new InvalidDataException("Username cannot be empty");
 
+            ValidationHelper.validatePositiveInt(id, "Account ID");
+            ValidationHelper.validateNotEmpty(game, "Game Name");
+            ValidationHelper.validateNotEmpty(user, "Game Username");
+            ValidationHelper.validateRank(rankk);
+            ValidationHelper.validatePositiveInt(level, "Level");
+            ValidationHelper.validatePositiveInt(custId, "Customer ID");
+
             PreparedStatement ps = con.prepareStatement(
                 "INSERT INTO GAMING_ACC (GAMING_ACC_ID, GAME_NAME, GAME_USER_ID, RANKK, LEVEL, CUST_ID) VALUES (?,?,?,?,?,?)");
             ps.setInt(1, id);
@@ -79,7 +87,18 @@ public class GamingProfileService {
         } catch (InvalidDataException e) {
             System.out.println("  [VALIDATION ERROR] " + e.getMessage());
         } catch (SQLException e) {
-            System.out.println("  [SQL ERROR] " + e.getMessage());
+            String msg = e.getMessage();
+            if (msg.contains("a foreign key constraint fails")) {
+                if (msg.toLowerCase().contains("customer")) {
+                    System.out.println("  [SQL ERROR] The Customer ID you entered does not exist!");
+                } else if (msg.toLowerCase().contains("gaming_acc")) {
+                    System.out.println("  [SQL ERROR] The Gaming Account ID you entered does not exist!");
+                } else {
+                    System.out.println("  [SQL ERROR] A parent ID does not exist.");
+                }
+            } else {
+                System.out.println("  [SQL ERROR] " + msg);
+            }
         } catch (NumberFormatException e) {
             System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
         } catch (Exception e) {
@@ -126,7 +145,18 @@ public class GamingProfileService {
             }
             rs.close(); ps.close();
         } catch (SQLException e) {
-            System.out.println("  [SQL ERROR] " + e.getMessage());
+            String msg = e.getMessage();
+            if (msg.contains("a foreign key constraint fails")) {
+                if (msg.toLowerCase().contains("customer")) {
+                    System.out.println("  [SQL ERROR] The Customer ID you entered does not exist!");
+                } else if (msg.toLowerCase().contains("gaming_acc")) {
+                    System.out.println("  [SQL ERROR] The Gaming Account ID you entered does not exist!");
+                } else {
+                    System.out.println("  [SQL ERROR] A parent ID does not exist.");
+                }
+            } else {
+                System.out.println("  [SQL ERROR] " + msg);
+            }
         } catch (NumberFormatException e) {
             System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
         } catch (Exception e) {
@@ -147,6 +177,11 @@ public class GamingProfileService {
 
             if (achName.isEmpty()) throw new InvalidDataException("Achievement name cannot be empty.");
 
+            ValidationHelper.validatePositiveInt(achId, "Achievement ID");
+            ValidationHelper.validateNotEmpty(achName, "Achievement Name");
+            ValidationHelper.validateDate(dateUnlocked, "Date Unlocked");
+            ValidationHelper.validatePositiveInt(accId, "Gaming Account ID");
+
             PreparedStatement ps = con.prepareStatement(
                 "INSERT INTO ACHIEVEMENTS (ACHIEVEMENT_ID, ACHIEVE_NAME, DATE_UNLOCKED, GAMING_ACC_ID) VALUES (?,?,?,?)");
             ps.setInt(1, achId);
@@ -159,7 +194,18 @@ public class GamingProfileService {
         } catch (InvalidDataException e) {
             System.out.println("  [VALIDATION ERROR] " + e.getMessage());
         } catch (SQLException e) {
-            System.out.println("  [SQL ERROR] " + e.getMessage());
+            String msg = e.getMessage();
+            if (msg.contains("a foreign key constraint fails")) {
+                if (msg.toLowerCase().contains("customer")) {
+                    System.out.println("  [SQL ERROR] The Customer ID you entered does not exist!");
+                } else if (msg.toLowerCase().contains("gaming_acc")) {
+                    System.out.println("  [SQL ERROR] The Gaming Account ID you entered does not exist!");
+                } else {
+                    System.out.println("  [SQL ERROR] A parent ID does not exist.");
+                }
+            } else {
+                System.out.println("  [SQL ERROR] " + msg);
+            }
         } catch (NumberFormatException e) {
             System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
         } catch (Exception e) {
@@ -187,7 +233,18 @@ public class GamingProfileService {
             }
             rs.close(); ps.close();
         } catch (SQLException e) {
-            System.out.println("  [SQL ERROR] " + e.getMessage());
+            String msg = e.getMessage();
+            if (msg.contains("a foreign key constraint fails")) {
+                if (msg.toLowerCase().contains("customer")) {
+                    System.out.println("  [SQL ERROR] The Customer ID you entered does not exist!");
+                } else if (msg.toLowerCase().contains("gaming_acc")) {
+                    System.out.println("  [SQL ERROR] The Gaming Account ID you entered does not exist!");
+                } else {
+                    System.out.println("  [SQL ERROR] A parent ID does not exist.");
+                }
+            } else {
+                System.out.println("  [SQL ERROR] " + msg);
+            }
         } catch (NumberFormatException e) {
             System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
         } catch (Exception e) {
@@ -216,7 +273,18 @@ public class GamingProfileService {
             
             System.out.println("  [✓] Gaming account and achievements deleted successful.");
         } catch (SQLException e) {
-            System.out.println("  [SQL ERROR] " + e.getMessage());
+            String msg = e.getMessage();
+            if (msg.contains("a foreign key constraint fails")) {
+                if (msg.toLowerCase().contains("customer")) {
+                    System.out.println("  [SQL ERROR] The Customer ID you entered does not exist!");
+                } else if (msg.toLowerCase().contains("gaming_acc")) {
+                    System.out.println("  [SQL ERROR] The Gaming Account ID you entered does not exist!");
+                } else {
+                    System.out.println("  [SQL ERROR] A parent ID does not exist.");
+                }
+            } else {
+                System.out.println("  [SQL ERROR] " + msg);
+            }
         } catch (NumberFormatException e) {
             System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
         } catch (Exception e) {
@@ -224,3 +292,4 @@ public class GamingProfileService {
         }
     }
 }
+

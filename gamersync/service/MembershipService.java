@@ -2,6 +2,7 @@ package gamersync.service;
 
 import gamersync.db.DBConnection;
 import gamersync.db.InvalidDataException;
+import gamersync.db.ValidationHelper;
 import java.sql.*;
 import java.util.Scanner;
 
@@ -226,6 +227,11 @@ public class MembershipService {
             System.out.print("  New End Date   (YYYY-MM-DD): ");
             String newEnd = sc.nextLine().trim();
 
+            ValidationHelper.validatePositiveInt(memId, "Membership ID");
+            ValidationHelper.validateMembershipType(newType);
+            ValidationHelper.validateDate(newStart, "Start Date");
+            ValidationHelper.validateDate(newEnd, "End Date");
+
             PreparedStatement ups = con.prepareStatement("UPDATE MEMBERSHIP SET MEM_TYPE=?, START_DATE=?, END_DATE=? WHERE MEMBERSHIP_ID=?");
             ups.setString(1, newType);
             ups.setString(2, newStart);
@@ -240,6 +246,10 @@ public class MembershipService {
                 int hrs = Integer.parseInt(sc.nextLine().trim());
                 System.out.print("  Enter COST_HR: ");
                 double costHr = Double.parseDouble(sc.nextLine().trim());
+                
+                ValidationHelper.validatePositiveInt(hrs, "Hours Purchased");
+                ValidationHelper.validatePositiveAmount(costHr, "Cost per Hour");
+
                 PreparedStatement ips = con.prepareStatement("INSERT INTO HOURLY (MEMBERSHIP_ID, HRS_PURCHASED, COST_HR) VALUES (?,?,?)");
                 ips.setInt(1, memId); ips.setInt(2, hrs); ips.setDouble(3, costHr);
                 ips.executeUpdate(); ips.close();
@@ -248,9 +258,22 @@ public class MembershipService {
                 int vDays = Integer.parseInt(sc.nextLine().trim());
                 System.out.print("  Enter WEEKLY_FEE: ");
                 double wFee = Double.parseDouble(sc.nextLine().trim());
+                
+                ValidationHelper.validatePositiveInt(vDays, "Valid Days");
+                ValidationHelper.validatePositiveAmount(wFee, "Weekly Fee");
+                
                 PreparedStatement ips = con.prepareStatement("INSERT INTO WEEKLY (MEMBERSHIP_ID, VALID_DAYS, WEEKLY_FEE) VALUES (?,?,?)");
                 ips.setInt(1, memId); ips.setInt(2, vDays); ips.setDouble(3, wFee);
                 ips.executeUpdate(); ips.close();
+            } else if (newType.equals("Monthly")) {
+                System.out.print("  Enter VALID_WEEKS: ");
+                int vWks = Integer.parseInt(sc.nextLine().trim());
+                System.out.print("  Enter MONTHLY_FEE: ");
+                double mFee = Double.parseDouble(sc.nextLine().trim());
+                
+                ValidationHelper.validatePositiveInt(vWks, "Valid Weeks");
+                ValidationHelper.validatePositiveAmount(mFee, "Monthly Fee");
+                
             } else if (newType.equals("Monthly")) {
                 System.out.print("  Enter VALID_WEEKS: ");
                 int vWks = Integer.parseInt(sc.nextLine().trim());
@@ -299,6 +322,10 @@ public class MembershipService {
             if (newStart.isEmpty() || newEnd.isEmpty()) {
                 throw new InvalidDataException("Start date and End date cannot be empty.");
             }
+
+            ValidationHelper.validatePositiveInt(memId, "Membership ID");
+            ValidationHelper.validateDate(newStart, "Start Date");
+            ValidationHelper.validateDate(newEnd, "End Date");
 
             PreparedStatement ups = con.prepareStatement("UPDATE MEMBERSHIP SET START_DATE=?, END_DATE=? WHERE MEMBERSHIP_ID=?");
             ups.setString(1, newStart);

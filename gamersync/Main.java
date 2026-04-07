@@ -1,4 +1,4 @@
-package gamersync;
+﻿package gamersync;
 
 import gamersync.db.DBConnection;
 import gamersync.service.CustomerService;
@@ -10,6 +10,11 @@ import gamersync.service.QueryService;
 import gamersync.service.SessionService;
 import gamersync.service.TournamentService;
 import gamersync.service.WalkInService;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class Main {
@@ -23,8 +28,9 @@ public class Main {
         System.out.println("  ║          Console Application             ║");
         System.out.println("  ╚══════════════════════════════════════════╝");
         
+        Connection con = null;
         try {
-            DBConnection.getConnection();
+            con = DBConnection.getConnection();
             System.out.println("  [✓] Connected to GamerSync database.\n");
         } catch (Exception e) {
             System.out.println("  [✗] DB Connection FAILED: " + e.getMessage());
@@ -56,6 +62,7 @@ public class Main {
             System.out.println("  ║  7. Walk-In Flow (Combinations)          ║");
             System.out.println("  ║  8. Analytical Queries                   ║");
             System.out.println("  ║  9. Membership Module                    ║");
+            System.out.println("  ║  10. View All Tables                     ║");
             System.out.println("  ║  0. Exit                                 ║");
             System.out.println("  ╚══════════════════════════════════════════╝");
             System.out.print("  Choice: ");
@@ -70,6 +77,7 @@ public class Main {
                 case "7": walkInService.menu();        break;
                 case "8": queryMenu(sc, queryService); break;
                 case "9": membershipService.menu();    break;
+                case "10": viewAllTables(con);         break;
                 case "0":
                     running = false;
                     DBConnection.close();
@@ -125,5 +133,81 @@ public class Main {
                 default:  System.out.println("  [!] Invalid choice.");
             }
         }
+    }
+
+    private static void viewAllTables(Connection con) {
+
+        // All 12 table names in logical order
+        String[][] tables = {
+            {"CUSTOMER",       "CUST_ID, NAME, PHONE, EMAIL, REGISTERED_DATE"},
+            {"PC",             "PC_ID, CONFIGURATION, STATUS, HOURLY_RATE"},
+            {"GAMING_SESSION", "SESSION_ID, START_TIME, END_TIME, DURATION, GAME_NAME, CUST_ID, PC_ID"},
+            {"GAMING_ACC",     "GAMING_ACC_ID, GAME_NAME, GAME_USER_ID, RANKK, LEVEL, CUST_ID"},
+            {"ACHIEVEMENTS",   "ACHIEVEMENT_ID, ACHIEVE_NAME, DATE_UNLOCKED, GAMING_ACC_ID"},
+            {"MEMBERSHIP",     "MEMBERSHIP_ID, MEM_TYPE, START_DATE, END_DATE, CUST_ID"},
+            {"HOURLY",         "MEMBERSHIP_ID, HRS_PURCHASED, COST_HR"},
+            {"WEEKLY",         "MEMBERSHIP_ID, VALID_DAYS, WEEKLY_FEE"},
+            {"MONTHLY",        "MEMBERSHIP_ID, VALID_WEEKS, MONTHLY_FEE"},
+            {"FOOD_ORDER",     "ORDER_ID, ORDER_ITEM, TOTAL_AMOUNT, SESSION_ID"},
+            {"TOURNAMENTS",    "TOURNAMENT_ID, GAME_NAME, TOURNAMENT_DATE, ENTRY_FEE, CUST_ID"},
+            {"PAYMENT",        "PAYMENT_ID, PAYMENT_MODE, AMOUNT, CUST_ID, SESSION_ID"}
+        };
+
+        System.out.println("\n  ╔══════════════════════════════════════════╗");
+        System.out.println("  ║         VIEW ALL TABLES — GAMERSYNC     ║");
+        System.out.println("  ║         Showing all 12 DB tables        ║");
+        System.out.println("  ╚══════════════════════════════════════════╝\n");
+
+        for (String[] tableInfo : tables) {
+            String tableName = tableInfo[0];
+
+            System.out.println("  ┌─────────────────────────────────────────");
+            System.out.println("  │ TABLE: " + tableName);
+            System.out.println("  └─────────────────────────────────────────");
+
+            try {
+                PreparedStatement ps = con.prepareStatement("SELECT * FROM " + tableName);
+                ResultSet rs = ps.executeQuery();
+                ResultSetMetaData meta = rs.getMetaData();
+                int colCount = meta.getColumnCount();
+
+                // Print column headers
+                System.out.print("  ");
+                for (int i = 1; i <= colCount; i++) {
+                    System.out.printf("%-20s", meta.getColumnName(i));
+                }
+                System.out.println();
+                System.out.println("  " + "-".repeat(colCount * 20));
+
+                // Print rows
+                int rowCount = 0;
+                while (rs.next()) {
+                    System.out.print("  ");
+                    for (int i = 1; i <= colCount; i++) {
+                        String val = rs.getString(i);
+                        System.out.printf("%-20s", val != null ? val : "NULL");
+                    }
+                    System.out.println();
+                    rowCount++;
+                }
+
+                if (rowCount == 0)
+                    System.out.println("  (No records in this table)");
+                else
+                    System.out.println("  → " + rowCount + " record(s)");
+
+                rs.close();
+                ps.close();
+
+            } catch (SQLException e) {
+                System.out.println("  [SQL ERROR reading " + tableName + "] " + e.getMessage());
+            }
+
+            System.out.println();
+        }
+
+        System.out.println("  ╔══════════════════════════════════════════╗");
+        System.out.println("  ║   All 12 tables displayed successfully  ║");
+        System.out.println("  ╚══════════════════════════════════════════╝\n");
     }
 }

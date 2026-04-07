@@ -2,6 +2,7 @@ package gamersync.service;
 
 import gamersync.db.DBConnection;
 import gamersync.db.InvalidDataException;
+import gamersync.db.ValidationHelper;
 import java.sql.*;
 import java.util.Scanner;
 
@@ -61,6 +62,12 @@ public class TournamentService {
             if (game.isEmpty()) throw new InvalidDataException("Game name cannot be empty");
             if (fee <= 0) throw new InvalidDataException("Entry fee must be greater than 0");
 
+            ValidationHelper.validatePositiveInt(id, "Tournament ID");
+            ValidationHelper.validateNotEmpty(game, "Game Name");
+            ValidationHelper.validateDate(date, "Tournament Date");
+            ValidationHelper.validatePositiveAmount(fee, "Entry Fee");
+            ValidationHelper.validatePositiveInt(custId, "Customer ID");
+
             PreparedStatement ps = con.prepareStatement(
                 "INSERT INTO TOURNAMENTS (TOURNAMENT_ID, GAME_NAME, TOURNAMENT_DATE, ENTRY_FEE, CUST_ID) VALUES (?,?,?,?,?)");
             ps.setInt(1, id);
@@ -74,7 +81,16 @@ public class TournamentService {
         } catch (InvalidDataException e) {
             System.out.println("  [VALIDATION ERROR] " + e.getMessage());
         } catch (SQLException e) {
-            System.out.println("  [SQL ERROR] " + e.getMessage());
+            String msg = e.getMessage();
+            if (msg.contains("a foreign key constraint fails")) {
+                if (msg.toLowerCase().contains("customer")) {
+                    System.out.println("  [SQL ERROR] The Customer ID you entered does not exist!");
+                } else {
+                    System.out.println("  [SQL ERROR] A parent ID does not exist.");
+                }
+            } else {
+                System.out.println("  [SQL ERROR] " + msg);
+            }
         } catch (NumberFormatException e) {
             System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
         } catch (Exception e) {
@@ -145,7 +161,16 @@ public class TournamentService {
             }
             rs.close(); ps.close();
         } catch (SQLException e) {
-            System.out.println("  [SQL ERROR] " + e.getMessage());
+            String msg = e.getMessage();
+            if (msg.contains("a foreign key constraint fails")) {
+                if (msg.toLowerCase().contains("customer")) {
+                    System.out.println("  [SQL ERROR] The Customer ID you entered does not exist!");
+                } else {
+                    System.out.println("  [SQL ERROR] A parent ID does not exist.");
+                }
+            } else {
+                System.out.println("  [SQL ERROR] " + msg);
+            }
         } catch (NumberFormatException e) {
             System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
         } catch (Exception e) {
@@ -166,7 +191,16 @@ public class TournamentService {
             ps.close();
             System.out.println("  [✓] Delete successful.");
         } catch (SQLException e) {
-            System.out.println("  [SQL ERROR] " + e.getMessage());
+            String msg = e.getMessage();
+            if (msg.contains("a foreign key constraint fails")) {
+                if (msg.toLowerCase().contains("customer")) {
+                    System.out.println("  [SQL ERROR] The Customer ID you entered does not exist!");
+                } else {
+                    System.out.println("  [SQL ERROR] A parent ID does not exist.");
+                }
+            } else {
+                System.out.println("  [SQL ERROR] " + msg);
+            }
         } catch (NumberFormatException e) {
             System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
         } catch (Exception e) {
