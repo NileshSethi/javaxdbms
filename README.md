@@ -1,5 +1,3 @@
----
-
 # GamerSync — Gaming Café Management System
 
 > A Java + MySQL CLI-based management system for gaming cafés.
