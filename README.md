@@ -161,3 +161,5 @@ DB Features used: Triggers, Stored Procedures, Functions, Views
 - DB triggers handle PC status update and payment validation automatically
 - All SQL uses PreparedStatement — no string concatenation (SQL injection safe)
 - Scanner is never closed inside service methods (shared instance from Main)
+
+---
