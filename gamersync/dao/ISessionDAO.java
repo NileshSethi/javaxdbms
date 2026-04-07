@@ -10,4 +10,6 @@ public interface ISessionDAO {
     void               addSession(GamingSession s) throws SQLException, InvalidDataException;
     List<GamingSession> getAllSessions()            throws SQLException;
     void               deleteSession(int sessionId) throws SQLException;
+    void               updateSession(GamingSession s) throws SQLException, InvalidDataException;
+    GamingSession      getSessionById(int sessionId) throws SQLException;
 }

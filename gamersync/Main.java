@@ -19,7 +19,7 @@ public class Main {
 
         System.out.println();
         System.out.println("  ╔══════════════════════════════════════════╗");
-        System.out.println("  ║       GAMERSYNC — CAFÉ MANAGEMENT        ║");
+        System.out.println("  ║       GAMERSYNC  CAFÉ MANAGEMENT        ║");
         System.out.println("  ║          Console Application             ║");
         System.out.println("  ╚══════════════════════════════════════════╝");
         
@@ -51,11 +51,11 @@ public class Main {
             System.out.println("  ║  2. PC Management                        ║");
             System.out.println("  ║  3. Session Module                       ║");
             System.out.println("  ║  4. Gaming Profile (GAMING_ACC & ACHIEV) ║");
-            System.out.println("  ║  5. Memberships Module                   ║");
-            System.out.println("  ║  6. Food & Payment                       ║");
-            System.out.println("  ║  7. Tournaments                          ║");
-            System.out.println("  ║  8. Walk-In Flow (Combinations)          ║");
-            System.out.println("  ║  9. Analytical Queries                   ║");
+            System.out.println("  ║  5. Food & Payment                       ║");
+            System.out.println("  ║  6. Tournaments                          ║");
+            System.out.println("  ║  7. Walk-In Flow (Combinations)          ║");
+            System.out.println("  ║  8. Analytical Queries                   ║");
+            System.out.println("  ║  9. Membership Module                    ║");
             System.out.println("  ║  0. Exit                                 ║");
             System.out.println("  ╚══════════════════════════════════════════╝");
             System.out.print("  Choice: ");
@@ -65,11 +65,11 @@ public class Main {
                 case "2": pcService.menu();            break;
                 case "3": sessionService.menu();       break;
                 case "4": profileService.menu();       break;
-                case "5": membershipService.menu();    break;
-                case "6": foodPaymentService.menu();   break;
-                case "7": tournamentService.menu();    break;
-                case "8": walkInService.menu();        break;
-                case "9": queryMenu(sc, queryService); break;
+                case "5": foodPaymentService.menu();   break;
+                case "6": tournamentService.menu();    break;
+                case "7": walkInService.menu();        break;
+                case "8": queryMenu(sc, queryService); break;
+                case "9": membershipService.menu();    break;
                 case "0":
                     running = false;
                     DBConnection.close();

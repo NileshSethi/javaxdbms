@@ -27,10 +27,11 @@ public class FoodPaymentService {
             System.out.println("  ║  1. Add Food Order to Session            ║");
             System.out.println("  ║  2. View All Food Orders                 ║");
             System.out.println("  ║  3. View Food Orders by Session ID       ║");
-            System.out.println("  ║  4. Add Payment                          ║");
-            System.out.println("  ║  5. View All Payments                    ║");
-            System.out.println("  ║  6. View Payments by Customer ID         ║");
-            System.out.println("  ║  7. View Full Session Bill               ║");
+            System.out.println("  ║  4. Update Food Order                    ║");
+            System.out.println("  ║  5. Add Payment                          ║");
+            System.out.println("  ║  6. View All Payments                    ║");
+            System.out.println("  ║  7. View Payments by Customer ID         ║");
+            System.out.println("  ║  8. View Full Session Bill               ║");
             System.out.println("  ║  0. Back                                 ║");
             System.out.println("  ╚══════════════════════════════════════════╝");
             System.out.print("  Choice: ");
@@ -39,10 +40,11 @@ public class FoodPaymentService {
                 case "1": addFoodOrder(); break;
                 case "2": viewAllFoodOrders(); break;
                 case "3": viewFoodOrdersBySessionId(); break;
-                case "4": addPayment(); break;
-                case "5": viewAllPayments(); break;
-                case "6": viewPaymentsByCustId(); break;
-                case "7": viewFullSessionBill(); break;
+                case "4": updateFoodOrder(); break;
+                case "5": addPayment(); break;
+                case "6": viewAllPayments(); break;
+                case "7": viewPaymentsByCustId(); break;
+                case "8": viewFullSessionBill(); break;
                 case "0": back = true; break;
                 default: System.out.println("  [!] Invalid choice.");
             }
@@ -121,6 +123,64 @@ public class FoodPaymentService {
                     rs.getInt("SESSION_ID"));
             }
             rs.close(); ps.close();
+        } catch (SQLException e) {
+            System.out.println("  [SQL ERROR] " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("  [INPUT ERROR] Numeric fields must be numbers.");
+        } catch (Exception e) {
+            System.out.println("  [UNEXPECTED ERROR] " + e.getMessage());
+        }
+    }
+
+    private void updateFoodOrder() {
+        try {
+            System.out.print("  Enter Order ID to update: ");
+            int orderId = Integer.parseInt(sc.nextLine().trim());
+
+            PreparedStatement ps = con.prepareStatement(
+                "SELECT ORDER_ID, ORDER_ITEM, TOTAL_AMOUNT, SESSION_ID FROM FOOD_ORDER WHERE ORDER_ID = ?");
+            ps.setInt(1, orderId);
+            ResultSet rs = ps.executeQuery();
+            
+            if (!rs.next()) {
+                System.out.println("  [!] Food order not found.");
+                rs.close(); ps.close();
+                return;
+            }
+
+            String currentItem = rs.getString("ORDER_ITEM");
+            double currentAmount = rs.getDouble("TOTAL_AMOUNT");
+            int sessionId = rs.getInt("SESSION_ID");
+            rs.close(); ps.close();
+
+            System.out.println("  Current Order Item  : " + currentItem);
+            System.out.println("  Current Amount      : Rs. " + currentAmount);
+            System.out.println("  Session ID          : " + sessionId);
+
+            System.out.print("  New Order Item (or Enter to keep current): ");
+            String newItemInput = sc.nextLine().trim();
+            System.out.print("  New Total Amount (or Enter to keep current): ");
+            String newAmountInput = sc.nextLine().trim();
+
+            String newItem = newItemInput.isEmpty() ? currentItem : newItemInput;
+            double newAmount = currentAmount;
+            if (!newAmountInput.isEmpty()) {
+                newAmount = Double.parseDouble(newAmountInput);
+                if (newAmount <= 0) throw new InvalidDataException("Amount must be > 0");
+            }
+
+            PreparedStatement ups = con.prepareStatement("UPDATE FOOD_ORDER SET ORDER_ITEM=?, TOTAL_AMOUNT=? WHERE ORDER_ID=?");
+            ups.setString(1, newItem);
+            ups.setDouble(2, newAmount);
+            ups.setInt(3, orderId);
+            ups.executeUpdate();
+            ups.close();
+
+            System.out.println("  [✓] Food order updated successful.");
+            System.out.println("  Updated: " + newItem + " — Rs. " + newAmount);
+
+        } catch (InvalidDataException e) {
+            System.out.println("  [VALIDATION ERROR] " + e.getMessage());
         } catch (SQLException e) {
             System.out.println("  [SQL ERROR] " + e.getMessage());
         } catch (NumberFormatException e) {

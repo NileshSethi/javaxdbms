@@ -116,11 +116,33 @@ public class CustomerService {
     // ── UPDATE ────────────────────────────────────────────────────────────────
     private void updateCustomer() {
         try {
-            System.out.print("  Customer ID to update: "); int id = Integer.parseInt(sc.nextLine().trim());
-            System.out.print("  New Name  : "); String name  = sc.nextLine().trim();
-            System.out.print("  New Phone : "); String phone = sc.nextLine().trim();
-            System.out.print("  New Email : "); String email = sc.nextLine().trim();
-            System.out.print("  New Date (YYYY-MM-DD): "); String date = sc.nextLine().trim();
+            System.out.print("  Customer ID to update: "); 
+            int id = Integer.parseInt(sc.nextLine().trim());
+            
+            Customer current = dao.getCustomerById(id);
+            if (current == null) {
+                System.out.println("  [!] Customer not found.");
+                return;
+            }
+            
+            System.out.println("  Current Name      : " + current.getName());
+            System.out.println("  Current Phone     : " + current.getPhone());
+            System.out.println("  Current Email     : " + current.getEmail());
+            System.out.println("  Current Reg Date  : " + current.getRegisteredDate());
+
+            System.out.print("  New Name (or press Enter to keep current)  : "); 
+            String nameInput  = sc.nextLine().trim();
+            System.out.print("  New Phone (or press Enter to keep current) : "); 
+            String phoneInput = sc.nextLine().trim();
+            System.out.print("  New Email (or press Enter to keep current) : "); 
+            String emailInput = sc.nextLine().trim();
+            System.out.print("  New Date (YYYY-MM-DD) (or Enter to keep)   : "); 
+            String dateInput = sc.nextLine().trim();
+
+            String name = nameInput.isEmpty() ? current.getName() : nameInput;
+            String phone = phoneInput.isEmpty() ? current.getPhone() : phoneInput;
+            String email = emailInput.isEmpty() ? current.getEmail() : emailInput;
+            String date = dateInput.isEmpty() ? current.getRegisteredDate() : dateInput;
 
             dao.updateCustomer(new Customer(id, name, phone, email, date));
             System.out.println("  [✓] Customer updated successfully.");

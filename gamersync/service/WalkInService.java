@@ -4,6 +4,8 @@ import gamersync.db.DBConnection;
 import gamersync.db.InvalidDataException;
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class WalkInService {
@@ -119,10 +121,14 @@ public class WalkInService {
                 int pcId = Integer.parseInt(sc.nextLine().trim());
                 System.out.print("  Enter START_TIME (YYYY-MM-DD HH:MM:SS): ");
                 String startTime = sc.nextLine().trim();
-                System.out.print("  Enter END_TIME (YYYY-MM-DD HH:MM:SS): ");
-                String endTime = sc.nextLine().trim();
                 System.out.print("  Enter DURATION (minutes): ");
                 int duration = Integer.parseInt(sc.nextLine().trim());
+                
+                LocalDateTime startObj = LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                LocalDateTime endObj = startObj.plusMinutes(duration);
+                String endTime = endObj.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                System.out.println("  Auto-calculated End Time: " + endTime);
+
                 System.out.print("  Enter GAME_NAME: ");
                 gameName = sc.nextLine().trim();
 
@@ -305,10 +311,14 @@ public class WalkInService {
             int pcId = Integer.parseInt(sc.nextLine().trim());
             System.out.print("  Enter START_TIME (YYYY-MM-DD HH:MM:SS): ");
             String startTime = sc.nextLine().trim();
-            System.out.print("  Enter END_TIME (YYYY-MM-DD HH:MM:SS): ");
-            String endTime = sc.nextLine().trim();
             System.out.print("  Enter DURATION (minutes): ");
             int duration = Integer.parseInt(sc.nextLine().trim());
+
+            LocalDateTime startObj = LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            LocalDateTime endObj = startObj.plusMinutes(duration);
+            String endTime = endObj.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            System.out.println("  Auto-calculated End Time: " + endTime);
+
             System.out.print("  Enter GAME_NAME: ");
             String gameName = sc.nextLine().trim();
 
