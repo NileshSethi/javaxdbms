@@ -1,7 +1,7 @@
 # GamerSync — Gaming Café Management System
 
 > A Java + MySQL CLI-based management system for gaming cafés.
-> Built as a college mini project using Core Java, JDBC, and MySQL.
+> Built using Core Java, JDBC, and MySQL.
 
 ---
 
@@ -152,17 +152,6 @@ DB Features used: Triggers, Stored Procedures, Functions, Views
 10. View All Tables
 0.  Exit
 ```
-
----
-
-## 🧪 Sample Test Flow (Viva Demo)
-
-1. Run option 1 (Walk-In Flow) → add new customer → assign PC → start session
-   → add membership → register gaming account
-2. Run option 5 (Food & Payment) → add food order → add payment → view full bill
-3. Run option 8 (Analytical Queries) → run ranking query → call stored procedure
-   → query views
-4. Run option 10 → view all 12 tables at once
 
 ---
 
