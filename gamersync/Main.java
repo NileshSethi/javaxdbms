@@ -154,15 +154,15 @@ public class Main {
         };
 
         System.out.println("\n  ╔══════════════════════════════════════════╗");
-        System.out.println("  ║         VIEW ALL TABLES — GAMERSYNC     ║");
-        System.out.println("  ║         Showing all 12 DB tables        ║");
+        System.out.println("  ║         VIEW ALL TABLES — GAMERSYNC      ║");
+        System.out.println("  ║         Showing all 12 DB tables         ║");
         System.out.println("  ╚══════════════════════════════════════════╝\n");
 
         for (String[] tableInfo : tables) {
             String tableName = tableInfo[0];
 
             System.out.println("  ┌─────────────────────────────────────────");
-            System.out.println("  │ TABLE: " + tableName);
+            System.out.println("    │ TABLE: " + tableName);                    
             System.out.println("  └─────────────────────────────────────────");
 
             try {
@@ -207,7 +207,7 @@ public class Main {
         }
 
         System.out.println("  ╔══════════════════════════════════════════╗");
-        System.out.println("  ║   All 12 tables displayed successfully  ║");
+        System.out.println("  ║   All 12 tables displayed successfully   ║");
         System.out.println("  ╚══════════════════════════════════════════╝\n");
     }
 }
