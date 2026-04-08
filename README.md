@@ -14,6 +14,13 @@
 
 ---
 
+## 🏃 Agile Development Process
+
+![Agile Diagram](agile_diagram.jpeg)
+*(Note: Please save the picture you uploaded as `agile_diagram.jpeg` in the root of your project folder so it displays here.)*
+
+---
+
 ## 🗂️ Project Structure
 
 ```
