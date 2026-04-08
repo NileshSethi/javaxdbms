@@ -9,7 +9,7 @@
 <!-- Add your names here -->
 - Member 1: NILESH SETHI
 - Member 2: OM GADWE
-- Member 3: NIMHAN VEDANT
+- Member 3: VEDANT NIMHAN
 - Member 4: OMAR PATEL
 
 ---
@@ -157,9 +157,9 @@ DB Features used: Triggers, Stored Procedures, Functions, Views
 
 ## 📝 Notes
 
-- END_TIME in sessions is auto-calculated from START_TIME + DURATION (never entered manually)
-- DB triggers handle PC status update and payment validation automatically
-- All SQL uses PreparedStatement — no string concatenation (SQL injection safe)
-- Scanner is never closed inside service methods (shared instance from Main)
+- END_TIME in sessions is automatically calculated using START_TIME + DURATION, so it is    not entered manually.
+- Database triggers automatically handle PC status updates and payment validation.
+- All SQL queries use PreparedStatement, so they are safe from SQL injection.
+- The Scanner object is not closed inside service methods because it is shared from Main.
 
 ---
