@@ -24,7 +24,7 @@ public class Main {
 
         System.out.println();
         System.out.println("  ╔══════════════════════════════════════════╗");
-        System.out.println("  ║       GAMERSYNC  CAFÉ MANAGEMENT        ║");
+        System.out.println("  ║       GAMERSYNC  CAFÉ MANAGEMENT         ║");
         System.out.println("  ║          Console Application             ║");
         System.out.println("  ╚══════════════════════════════════════════╝");
         
