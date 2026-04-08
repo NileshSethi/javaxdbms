@@ -18,7 +18,6 @@
 
 ![Agile Diagram](agile_diagram.jpeg)
 
-
 ---
 
 ## 🗂️ Project Structure
