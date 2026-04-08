@@ -5,8 +5,6 @@ import gamersync.model.GamingSession;
 import java.sql.*;
 import java.util.*;
 
-// CO2: extends BaseDAO (Inheritance) + implements ISessionDAO (Interface)
-// CO4: DML + DRL
 public class SessionDAO extends BaseDAO implements ISessionDAO {
 
     // ── INSERT (DML) ─────────────────────────────────────────────────────────

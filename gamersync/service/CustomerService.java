@@ -8,8 +8,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
 
-// Service layer — handles CLI input/output for Customer module
-// Mirrors BookingService pattern from RAILMATRIX
 public class CustomerService {
 
     private final CustomerDAO dao = new CustomerDAO();

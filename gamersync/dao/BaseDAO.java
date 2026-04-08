@@ -4,7 +4,6 @@ import gamersync.db.DBConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-// CO2: Abstract class — CustomerDAO and SessionDAO extend this (Inheritance)
 public abstract class BaseDAO {
     protected Connection con;
 

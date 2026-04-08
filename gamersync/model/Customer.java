@@ -1,7 +1,5 @@
 package gamersync.model;
 
-// CO1: Class with private fields, access specifiers, methods
-// CO2: toString() overrides = polymorphism
 public class Customer {
     private int    custId;
     private String name;
@@ -33,7 +31,7 @@ public class Customer {
     public void setEmail(String email)                { this.email = email; }
     public void setRegisteredDate(String registeredDate) { this.registeredDate = registeredDate; }
 
-    @Override // CO2: Polymorphism - method overriding
+    @Override 
     public String toString() {
         return String.format("| %-4d | %-15s | %-12s | %-25s | %-12s |",
             custId, name, phone, email, registeredDate);

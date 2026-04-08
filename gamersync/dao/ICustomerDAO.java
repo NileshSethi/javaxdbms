@@ -5,7 +5,7 @@ import gamersync.model.Customer;
 import java.sql.SQLException;
 import java.util.List;
 
-// CO2: Interface — defines contract for Customer operations
+
 public interface ICustomerDAO {
     void         addCustomer(Customer c)          throws SQLException, InvalidDataException;
     List<Customer> getAllCustomers()              throws SQLException;

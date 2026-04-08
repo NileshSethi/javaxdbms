@@ -1,7 +1,7 @@
 package gamersync.model;
 
-// CO1: Class with private fields, access specifiers, methods
-// CO2: toString() overrides = polymorphism
+//  Class with private fields, access specifiers, methods
+// toString() overrides = polymorphism
 public class GamingSession {
     private int    sessionId;
     private String startTime;

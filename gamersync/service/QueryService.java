@@ -4,7 +4,6 @@ import gamersync.db.DBConnection;
 import java.sql.*;
 import java.util.Scanner;
 
-// CO4: DRL queries (SELECT with JOIN, GROUP BY, WINDOW FUNCTIONS)
 // These are the specific queries from the GamerSync SQL file
 public class QueryService {
 

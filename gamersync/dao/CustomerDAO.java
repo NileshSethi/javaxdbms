@@ -5,8 +5,6 @@ import gamersync.model.Customer;
 import java.sql.*;
 import java.util.*;
 
-// CO2: extends BaseDAO (Inheritance) + implements ICustomerDAO (Interface)
-// CO4: DML (insert, update, delete) + DRL (select)
 public class CustomerDAO extends BaseDAO implements ICustomerDAO {
 
     // ── INSERT (DML) ─────────────────────────────────────────────────────────
